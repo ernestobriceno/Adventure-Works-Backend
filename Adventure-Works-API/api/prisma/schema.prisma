@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  brand     String
+  price     Decimal  @db.Decimal(10,2)
+  image     String
+  tag       String?
+  rating    Int?     @default(5)
+  stockTag  String?  // "ok" | "low"
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  items     OrderItem[]
+  subtotal  Decimal      @db.Decimal(10,2)
+  createdAt DateTime     @default(now())
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  name      String
+  price     Decimal  @db.Decimal(10,2)
+  image     String
+  qty       Int
+}
